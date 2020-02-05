@@ -1,0 +1,36 @@
+const G = 0
+const T2 = 3
+const CAPACITY = 1
+range LEVEL = 1..3
+range FLOORS = G..T2
+range NUMBER = 0..1
+
+FLOORCHECK = FLOORCHECK[1],
+FLOORCHECK[d:LEVEL] = ([h:LEVEL].scan -> SCAN[h]),
+SCAN = SCAN[1],
+SCAN[i:LEVEL] = (when (i > 0) [0].out -> FLOORCHECK[i] |
+				when (i > 1) [1].out -> FLOORCHECK[i] |
+				when (i > 2) [2..3].out -> FLOORCHECK[i]).
+
+property NO_SEC = NO_SEC[1],
+NO_SEC[d:LEVEL] = ([h:LEVEL].scan -> SCAN[h]),
+SCAN = SCAN[1],
+SCAN[i:LEVEL] = (when (i > 0) [0].out -> NO_SEC[i] |
+				when (i > 1) [1].out -> NO_SEC[i] |
+				when (i > 2) [2..3].out -> NO_SEC[i]).
+
+ELEVATOR = ELEVATOR[G],
+ELEVATOR[f:FLOORS] =
+	([f].in -> ELEVATOR[f] |
+	[f].out -> ELEVATOR[f] |
+	[g:FLOORS].callButton -> ELEVATOR[g] |
+	[r:FLOORS].insideButton -> ELEVATOR[r]).
+
+AREA_ELEVATOR =  NORMAL[0],
+NORMAL[i:NUMBER] = (when (i < CAPACITY) [G..T2].in -> NORMAL[i+1] |
+					when (i < CAPACITY) [FLOORS].callButton -> NORMAL[i] | 
+                    when (i == CAPACITY) [G..T2].out ->  NORMAL[i-1]|
+					when (i == CAPACITY) [FLOORS].insideButton-> NORMAL[i] |
+					when (i == CAPACITY) [LEVEL].scan -> NORMAL[i]).
+
+||AREA_51 = (ELEVATOR || AREA_ELEVATOR || FLOORCHECK || NO_SEC).
